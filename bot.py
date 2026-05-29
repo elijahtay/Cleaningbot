@@ -1,5 +1,6 @@
 import os
 import logging
+import html
 from datetime import datetime
 from telegram import (
     Update, InlineKeyboardButton, InlineKeyboardMarkup,
@@ -28,11 +29,14 @@ REPORT_TYPE, LOCATION, DESCRIPTION, PHOTO = range(4)
 LOCATIONS = [
     "Atrium & Lift Lobby",
     "Auditorium",
+    "Level 3",
     "Baby Space",
-    "Bookstore Male Toilet",
-    "Bookstore Female Toilet",
-    "IDR Male Toilet",
-    "IDR Female Toilet",
+    "Hub",
+    "Backstage",
+    "Washrooms (Male)",
+    "Washrooms (Female)",
+    "Storeroom",
+    "Others",
 ]
 
 REPORT_TYPES = {
@@ -41,8 +45,8 @@ REPORT_TYPES = {
         "emoji": "🛒",
         "title": "Missing / Used Up Stock",
         "desc_prompt": (
-            "What item is missing or has run out?.\n\n"
-            "_Example: Disinfectant Spray, Cloths, Brooms, Mops_"
+            "What item is missing or has run out? Please describe it clearly.\n\n"
+            "_Example: Toilet paper rolls, hand soap, mop head_"
         ),
         "color": "🟡",
         "needs_location": False,
@@ -52,8 +56,8 @@ REPORT_TYPES = {
         "emoji": "🔧",
         "title": "Broken Equipment",
         "desc_prompt": (
-            "What equipment is broken or damaged? \n\n"
-            "_Example: Mop bucket wheel is cracked, Mop handle is bent_"
+            "What equipment is broken or damaged? Please describe the issue.\n\n"
+            "_Example: Mop bucket wheel is cracked, cloth handle is bent_"
         ),
         "color": "🔴",
         "needs_location": False,
@@ -64,7 +68,7 @@ REPORT_TYPES = {
         "title": "Unresolved Issue",
         "desc_prompt": (
             "What issue did you notice? What did you try?\n\n"
-            "_Example: Light flickering in the toilet_"
+            "_Example: Light flickering in Hub, couldn't find the right switch_"
         ),
         "color": "🟠",
         "needs_location": True,
@@ -77,38 +81,38 @@ REPORT_TYPES = {
 # ─────────────────────────────────────────────
 CLEANING_INSTRUCTIONS = {
     "main_menu": (
-        "🧹 *Cleaning Instructions*\n\n"
+        "🧹 <b>Cleaning Instructions</b>\n\n"
         "Select a topic below to learn how to use the cleaning equipment properly."
     ),
     "mop": {
         "label": "🪣 Using a Mop after a spill",
         "text": (
-            "🪣 *Taking the mop from the cabinet*\n\n"
-            "1. [Take the yellow pail and put in 1 pump of Heavenly Lime]\n"
-            "2. [Take one blue mop and bring the yellow pail to fill it up with water in the toilet]\n"
-            "3. [There is a bidet gun you use under the cabinet in the male toilet, else you can use the shower]\n"
-            "4. [Mop in a figure-8 motion, working backwards]\n"
-            "5. [Wring out fully before mopping dry areas]\n\n"
+            "🪣 <b>Taking the mop from the cabinet</b>\n\n"
+            "1. Take the yellow pail and put in 1 pump of Heavenly Lime\n"
+            "2. Take one blue mop and bring the yellow pail to fill it up with water in the toilet\n"
+            "3. There is a bidet gun you can use under the cabinet in the male toilet, else you can use the shower\n"
+            "4. Mop in a figure-8 motion, working backwards\n"
+            "5. Wring out fully before mopping dry areas\n"
         ),
     },
     "cloths": {
-        "label": "Cleaning Table after hangout",
+        "label": "🧽 Cleaning Table after hangout",
         "text": (
-            "🧽 *Using the disposable cloths*\n\n"
-            "1. [Take the disinfectant spray bottle along with a disposable cloth]\n"
-            "2. [You can use the cloth multiple times and then dispose the cloth]\n"
-            "3. [Return the disinfectant spray to the cabinet after use]\n\n"
+            "🧽 <b>Using the disposable cloths</b>\n\n"
+            "1. Take the disinfectant spray bottle along with a disposable cloth\n"
+            "2. You can use the cloth multiple times and then dispose the cloth\n"
+            "3. Return the disinfectant spray to the cabinet after use\n"
         ),
     },
     "returning": {
         "label": "📦 Returning Equipment",
         "text": (
-            "📦 *Returning Equipment to the Cabinet*\n\n"
+            "📦 <b>Returning Equipment to the Cabinet</b>\n\n"
             "Please return all equipment clean and in good condition:\n\n"
-            "1. [Clean the Mop in the shower cubicle and wring it dry using the pail]\n"
-            "2. [Hang mop head facing down to air dry using the hook beside the cabinet]\n"
-            "3. [Place the Mop Bucket back into the cabinet]\n\n"
-            "If anything is damaged or missing, please report it after using\n"
+            "1. Clean the mop in the shower cubicle and wring it dry using the pail\n"
+            "2. Hang mop head facing down to air dry using the hook beside the cabinet\n"
+            "3. Place the mop bucket back into the cabinet\n\n"
+            "If anything is damaged or missing, please report it using\n"
             "the /start menu. Thank you! 🙏"
         ),
     },
@@ -129,10 +133,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
-        f"👋 Hi {user.first_name}! I'm the *HOGC FM Cabinet Bot*.\n\n"
+        f"👋 Hi {html.escape(user.first_name)}! I'm the <b>HOGC FM Cabinet Bot</b>.\n\n"
         "What would you like to do?",
         reply_markup=reply_markup,
-        parse_mode="Markdown"
+        parse_mode="HTML"
     )
     return REPORT_TYPE
 
@@ -155,17 +159,17 @@ async def report_type_selected(update: Update, context: ContextTypes.DEFAULT_TYP
             location_buttons.append(row)
 
         await query.edit_message_text(
-            f"{rtype['emoji']} *{rtype['title']}*\n\n📍 Where in the church is this issue?",
+            f"{rtype['emoji']} <b>{html.escape(rtype['title'])}</b>\n\n📍 Where in the church is this issue?",
             reply_markup=InlineKeyboardMarkup(location_buttons),
-            parse_mode="Markdown"
+            parse_mode="HTML"
         )
         return LOCATION
     else:
         context.user_data["location"] = None
         await query.edit_message_text(
-            f"{rtype['emoji']} *{rtype['title']}*\n\n"
+            f"{rtype['emoji']} <b>{html.escape(rtype['title'])}</b>\n\n"
             f"✏️ {rtype['desc_prompt']}",
-            parse_mode="Markdown"
+            parse_mode="HTML"
         )
         return DESCRIPTION
 
@@ -182,9 +186,9 @@ async def location_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     rtype = REPORT_TYPES[report_type]
 
     await query.edit_message_text(
-        f"{rtype['emoji']} *{rtype['title']}* — 📍 {location}\n\n"
+        f"{rtype['emoji']} <b>{html.escape(rtype['title'])}</b> — 📍 {html.escape(location)}\n\n"
         f"✏️ {rtype['desc_prompt']}",
-        parse_mode="Markdown"
+        parse_mode="HTML"
     )
     return DESCRIPTION
 
@@ -220,16 +224,16 @@ async def send_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     now = datetime.now().strftime("%d %b %Y, %I:%M %p")
     username = f"@{user.username}" if user.username else user.full_name
 
-    location_line = f"📍 *Location:* {data['location']}\n" if data.get("location") else ""
+    location_line = f"📍 <b>Location:</b> {html.escape(data['location'])}\n" if data.get("location") else ""
 
     report_text = (
-        f"{rtype['color']} *FM REPORT — {rtype['title'].upper()}*\n"
+        f"{rtype['color']} <b>FM REPORT — {html.escape(rtype['title'].upper())}</b>\n"
         f"{'─' * 30}\n"
         f"{location_line}"
-        f"📝 *Details:* {data['description']}\n"
+        f"📝 <b>Details:</b> {html.escape(data['description'])}\n"
         f"{'─' * 30}\n"
-        f"👤 *Reported by:* {username}\n"
-        f"🕐 *Time:* {now}"
+        f"👤 <b>Reported by:</b> {html.escape(username)}\n"
+        f"🕐 <b>Time:</b> {now}"
     )
 
     photo_id = data.get("photo_file_id")
@@ -240,19 +244,19 @@ async def send_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 chat_id=FM_GROUP_CHAT_ID,
                 photo=photo_id,
                 caption=report_text,
-                parse_mode="Markdown"
+                parse_mode="HTML"
             )
         else:
             await context.bot.send_message(
                 chat_id=FM_GROUP_CHAT_ID,
                 text=report_text,
-                parse_mode="Markdown"
+                parse_mode="HTML"
             )
 
         await update.message.reply_text(
-            "✅ *Report submitted!*\n\n"
+            "✅ <b>Report submitted!</b>\n\n"
             "The FM team has been notified. Thank you for flagging this! 🙏",
-            parse_mode="Markdown"
+            parse_mode="HTML"
         )
     except Exception as e:
         logger.error(f"Failed to send report to FM group: {e}")
@@ -274,14 +278,13 @@ async def cleaning_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton(CLEANING_INSTRUCTIONS["mop"]["label"], callback_data="clean_mop")],
         [InlineKeyboardButton(CLEANING_INSTRUCTIONS["cloths"]["label"], callback_data="clean_cloths")],
-        [InlineKeyboardButton(CLEANING_INSTRUCTIONS["cleaning_process"]["label"], callback_data="clean_process")],
         [InlineKeyboardButton(CLEANING_INSTRUCTIONS["returning"]["label"], callback_data="clean_return")],
         [InlineKeyboardButton("« Back to Main Menu", callback_data="back_main")],
     ]
     await query.edit_message_text(
         CLEANING_INSTRUCTIONS["main_menu"],
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode="Markdown"
+        parse_mode="HTML"
     )
 
 
@@ -292,7 +295,6 @@ async def cleaning_topic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     topic_map = {
         "clean_mop": "mop",
         "clean_cloths": "cloths",
-        "clean_process": "cleaning_process",
         "clean_return": "returning",
     }
     topic_key = topic_map.get(query.data)
@@ -304,7 +306,7 @@ async def cleaning_topic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_text(
         topic["text"],
         reply_markup=back_button,
-        parse_mode="Markdown"
+        parse_mode="HTML"
     )
 
 
@@ -321,7 +323,7 @@ async def back_to_main(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_text(
         "What would you like to do?",
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode="Markdown"
+        parse_mode="HTML"
     )
 
 
@@ -347,18 +349,27 @@ def main():
             REPORT_TYPE: [
                 CallbackQueryHandler(report_type_selected, pattern="^type_"),
                 CallbackQueryHandler(cleaning_menu, pattern="^cleaning_menu$"),
-                CallbackQueryHandler(cleaning_topic, pattern="^clean_(mop|cloths|process|return)$"),
+                CallbackQueryHandler(cleaning_topic, pattern="^clean_(mop|cloths|return)$"),
                 CallbackQueryHandler(back_to_main, pattern="^back_main$"),
             ],
             LOCATION: [
                 CallbackQueryHandler(location_selected, pattern="^loc_"),
+                CallbackQueryHandler(cleaning_menu, pattern="^cleaning_menu$"),
+                CallbackQueryHandler(cleaning_topic, pattern="^clean_(mop|cloths|return)$"),
+                CallbackQueryHandler(back_to_main, pattern="^back_main$"),
             ],
             DESCRIPTION: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, description_received),
+                CallbackQueryHandler(cleaning_menu, pattern="^cleaning_menu$"),
+                CallbackQueryHandler(cleaning_topic, pattern="^clean_(mop|cloths|return)$"),
+                CallbackQueryHandler(back_to_main, pattern="^back_main$"),
             ],
             PHOTO: [
                 MessageHandler(filters.PHOTO, photo_received),
                 CommandHandler("skip", skip_photo),
+                CallbackQueryHandler(cleaning_menu, pattern="^cleaning_menu$"),
+                CallbackQueryHandler(cleaning_topic, pattern="^clean_(mop|cloths|return)$"),
+                CallbackQueryHandler(back_to_main, pattern="^back_main$"),
             ],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
