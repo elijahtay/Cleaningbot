@@ -28,14 +28,11 @@ REPORT_TYPE, LOCATION, DESCRIPTION, PHOTO = range(4)
 LOCATIONS = [
     "Atrium & Lift Lobby",
     "Auditorium",
-    "Level 3",
     "Baby Space",
-    "Hub",
-    "Backstage",
-    "Washrooms (Male)",
-    "Washrooms (Female)",
-    "Storeroom",
-    "Others",
+    "Bookstore Male Toilet",
+    "Bookstore Female Toilet",
+    "IDR Male Toilet",
+    "IDR Female Toilet",
 ]
 
 REPORT_TYPES = {
@@ -44,8 +41,8 @@ REPORT_TYPES = {
         "emoji": "🛒",
         "title": "Missing / Used Up Stock",
         "desc_prompt": (
-            "What item is missing or has run out? Please describe it clearly.\n\n"
-            "_Example: Toilet paper rolls, hand soap, mop head_"
+            "What item is missing or has run out?.\n\n"
+            "_Example: Disinfectant Spray, Cloths, Brooms, Mops_"
         ),
         "color": "🟡",
         "needs_location": False,
@@ -55,8 +52,8 @@ REPORT_TYPES = {
         "emoji": "🔧",
         "title": "Broken Equipment",
         "desc_prompt": (
-            "What equipment is broken or damaged? Please describe the issue.\n\n"
-            "_Example: Mop bucket wheel is cracked, cloth handle is bent_"
+            "What equipment is broken or damaged? \n\n"
+            "_Example: Mop bucket wheel is cracked, Mop handle is bent_"
         ),
         "color": "🔴",
         "needs_location": False,
@@ -67,7 +64,7 @@ REPORT_TYPES = {
         "title": "Unresolved Issue",
         "desc_prompt": (
             "What issue did you notice? What did you try?\n\n"
-            "_Example: Light flickering in Hub, couldn't find the right switch_"
+            "_Example: Light flickering in the toilet_"
         ),
         "color": "🟠",
         "needs_location": True,
@@ -84,65 +81,34 @@ CLEANING_INSTRUCTIONS = {
         "Select a topic below to learn how to use the cleaning equipment properly."
     ),
     "mop": {
-        "label": "🪣 How to Use the Mop",
+        "label": "🪣 Using a Mop after a spill",
         "text": (
-            "🪣 *How to Use the Mop*\n\n"
-            "*(Replace this with your actual mop instructions)*\n\n"
-            "1. [Step 1 — e.g. Fill the mop bucket with water to the marked line]\n"
-            "2. [Step 2 — e.g. Add the correct amount of cleaning solution]\n"
-            "3. [Step 3 — e.g. Attach the mop head securely before use]\n"
-            "4. [Step 4 — e.g. Mop in a figure-8 motion, working backwards]\n"
-            "5. [Step 5 — e.g. Wring out fully before mopping dry areas]\n\n"
-            "⚠️ *Note:* [Add any safety or usage notes here]"
+            "🪣 *Taking the mop from the cabinet*\n\n"
+            "1. [Take the yellow pail and put in 1 pump of Heavenly Lime]\n"
+            "2. [Take one blue mop and bring the yellow pail to fill it up with water in the toilet]\n"
+            "3. [There is a bidet gun you use under the cabinet in the male toilet, else you can use the shower]\n"
+            "4. [Mop in a figure-8 motion, working backwards]\n"
+            "5. [Wring out fully before mopping dry areas]\n\n"
         ),
     },
     "cloths": {
-        "label": "🧽 How to Use the Cloths",
+        "label": "Cleaning Table after hangout",
         "text": (
-            "🧽 *How to Use the Cloths*\n\n"
-            "*(Replace this with your actual cloth/rag instructions)*\n\n"
-            "1. [Step 1 — e.g. Select the correct colour-coded cloth for the area]\n"
-            "2. [Step 2 — e.g. Dampen with water or appropriate cleaning spray]\n"
-            "3. [Step 3 — e.g. Wipe in one direction to avoid spreading dirt]\n"
-            "4. [Step 4 — e.g. Use a fresh cloth for different surfaces]\n\n"
-            "🎨 *Colour coding:*\n"
-            "• [Colour 1] — [Area/Use]\n"
-            "• [Colour 2] — [Area/Use]\n"
-            "• [Colour 3] — [Area/Use]\n\n"
-            "⚠️ *Note:* [Add any notes here]"
-        ),
-    },
-    "cleaning_process": {
-        "label": "🧼 Cleaning Process",
-        "text": (
-            "🧼 *Cleaning Process*\n\n"
-            "*(Replace this with your actual step-by-step cleaning guide)*\n\n"
-            "*Before you start:*\n"
-            "• [Checklist item 1 — e.g. Put on gloves]\n"
-            "• [Checklist item 2 — e.g. Check that the area is clear of people]\n\n"
-            "*During cleaning:*\n"
-            "1. [Step 1]\n"
-            "2. [Step 2]\n"
-            "3. [Step 3]\n\n"
-            "*After cleaning:*\n"
-            "• [e.g. Dispose of dirty water in the designated drain]\n"
-            "• [e.g. Rinse mop head thoroughly]\n"
-            "• [e.g. Hang mop to dry — do not leave it standing in water]\n\n"
-            "⚠️ *Note:* [Add any notes here]"
+            "🧽 *Using the disposable cloths*\n\n"
+            "1. [Take the disinfectant spray bottle along with a disposable cloth]\n"
+            "2. [You can use the cloth multiple times and then dispose the cloth]\n"
+            "3. [Return the disinfectant spray to the cabinet after use]\n\n"
         ),
     },
     "returning": {
         "label": "📦 Returning Equipment",
         "text": (
             "📦 *Returning Equipment to the Cabinet*\n\n"
-            "*(Replace this with your actual return/storage instructions)*\n\n"
             "Please return all equipment clean and in good condition:\n\n"
-            "1. [Step 1 — e.g. Rinse all cloths and wring dry before returning]\n"
-            "2. [Step 2 — e.g. Hang mop head facing down to air dry]\n"
-            "3. [Step 3 — e.g. Empty and rinse the mop bucket]\n"
-            "4. [Step 4 — e.g. Return items to their labelled positions]\n"
-            "5. [Step 5 — e.g. Close and latch the cabinet door]\n\n"
-            "If anything is damaged or missing, please report it using\n"
+            "1. [Clean the Mop in the shower cubicle and wring it dry using the pail]\n"
+            "2. [Hang mop head facing down to air dry using the hook beside the cabinet]\n"
+            "3. [Place the Mop Bucket back into the cabinet]\n\n"
+            "If anything is damaged or missing, please report it after using\n"
             "the /start menu. Thank you! 🙏"
         ),
     },
