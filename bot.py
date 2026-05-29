@@ -23,20 +23,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 FM_GROUP_CHAT_ID = os.getenv("FM_GROUP_CHAT_ID")  # negative number for groups
 
 # Conversation states
-REPORT_TYPE, LOCATION, DESCRIPTION, PHOTO = range(4)
-
-LOCATIONS = [
-    "Atrium & Lift Lobby",
-    "Auditorium",
-    "Level 3",
-    "Baby Space",
-    "Hub",
-    "Backstage",
-    "Washrooms (Male)",
-    "Washrooms (Female)",
-    "Storeroom",
-    "Others",
-]
+REPORT_TYPE, DESCRIPTION, PHOTO = range(4)
 
 REPORT_TYPES = {
     "missing": {
@@ -44,11 +31,10 @@ REPORT_TYPES = {
         "emoji": "🛒",
         "title": "Missing / Used Up Stock",
         "desc_prompt": (
-            "What item is missing or has run out? Please describe it clearly.\n\n"
-            "_Example: Toilet paper rolls, hand soap, mop head_"
+            "What item is missing or has run out?.\n\n"
+            "_Example: Cleaning detergent, Disinfectant Spray, disposable cloths, mop head_"
         ),
         "color": "🟡",
-        "needs_location": False,
     },
     "broken": {
         "label": "🔧 Broken Equipment",
@@ -56,10 +42,9 @@ REPORT_TYPES = {
         "title": "Broken Equipment",
         "desc_prompt": (
             "What equipment is broken or damaged? Please describe the issue.\n\n"
-            "_Example: Mop bucket wheel is cracked, cloth handle is bent_"
+            "_Example: Mop bucket wheel is cracked, mop handle is bent_"
         ),
         "color": "🔴",
-        "needs_location": False,
     },
     "issue": {
         "label": "⚠️ Unresolved Issue",
@@ -67,10 +52,9 @@ REPORT_TYPES = {
         "title": "Unresolved Issue",
         "desc_prompt": (
             "What issue did you notice? What did you try?\n\n"
-            "_Example: Light flickering in Hub, couldn't find the right switch_"
+            "_Example: Light flickering in IDR Male Toilet"
         ),
         "color": "🟠",
-        "needs_location": True,
     },
 }
 
@@ -87,63 +71,22 @@ CLEANING_INSTRUCTIONS = {
         "label": "🪣 How to Use the Mop",
         "text": (
             "🪣 *How to Use the Mop*\n\n"
-            "*(Replace this with your actual mop instructions)*\n\n"
-            "1. [Step 1 — e.g. Fill the mop bucket with water to the marked line]\n"
-            "2. [Step 2 — e.g. Add the correct amount of cleaning solution]\n"
-            "3. [Step 3 — e.g. Attach the mop head securely before use]\n"
-            "4. [Step 4 — e.g. Mop in a figure-8 motion, working backwards]\n"
-            "5. [Step 5 — e.g. Wring out fully before mopping dry areas]\n\n"
-            "⚠️ *Note:* [Add any safety or usage notes here]"
+            "1. [Take the Yellow Bucket and put in 1 pump of Heavenly Lime Solution]\n"
+            "2. [Bring the pail and blue mop to the washroom and add water]\n"
+            "3. [For general areas, use only the blue mops]\n"
+            "4. [Mop in a figure-8 motion, working backwards]\n"
+            "5. [Once done, pour the dirty water using the shower cubicle and wash it]\n"
+            "6. [Bring back the mop to the cabinet and hang it at the side, put the pail back into the cabinet]\n\n"
+            "⚠️ *Note:* [Do not place back the wet mop into the cabinet]"
         ),
     },
     "cloths": {
-        "label": "🧽 How to Use the Cloths",
+        "label": "🧽 Cleaning the hangout tables",
         "text": (
             "🧽 *How to Use the Cloths*\n\n"
-            "*(Replace this with your actual cloth/rag instructions)*\n\n"
-            "1. [Step 1 — e.g. Select the correct colour-coded cloth for the area]\n"
-            "2. [Step 2 — e.g. Dampen with water or appropriate cleaning spray]\n"
-            "3. [Step 3 — e.g. Wipe in one direction to avoid spreading dirt]\n"
-            "4. [Step 4 — e.g. Use a fresh cloth for different surfaces]\n\n"
-            "🎨 *Colour coding:*\n"
-            "• [Colour 1] — [Area/Use]\n"
-            "• [Colour 2] — [Area/Use]\n"
-            "• [Colour 3] — [Area/Use]\n\n"
-            "⚠️ *Note:* [Add any notes here]"
-        ),
-    },
-    "cleaning_process": {
-        "label": "🧼 Cleaning Process",
-        "text": (
-            "🧼 *Cleaning Process*\n\n"
-            "*(Replace this with your actual step-by-step cleaning guide)*\n\n"
-            "*Before you start:*\n"
-            "• [Checklist item 1 — e.g. Put on gloves]\n"
-            "• [Checklist item 2 — e.g. Check that the area is clear of people]\n\n"
-            "*During cleaning:*\n"
-            "1. [Step 1]\n"
-            "2. [Step 2]\n"
-            "3. [Step 3]\n\n"
-            "*After cleaning:*\n"
-            "• [e.g. Dispose of dirty water in the designated drain]\n"
-            "• [e.g. Rinse mop head thoroughly]\n"
-            "• [e.g. Hang mop to dry — do not leave it standing in water]\n\n"
-            "⚠️ *Note:* [Add any notes here]"
-        ),
-    },
-    "returning": {
-        "label": "📦 Returning Equipment",
-        "text": (
-            "📦 *Returning Equipment to the Cabinet*\n\n"
-            "*(Replace this with your actual return/storage instructions)*\n\n"
-            "Please return all equipment clean and in good condition:\n\n"
-            "1. [Step 1 — e.g. Rinse all cloths and wring dry before returning]\n"
-            "2. [Step 2 — e.g. Hang mop head facing down to air dry]\n"
-            "3. [Step 3 — e.g. Empty and rinse the mop bucket]\n"
-            "4. [Step 4 — e.g. Return items to their labelled positions]\n"
-            "5. [Step 5 — e.g. Close and latch the cabinet door]\n\n"
-            "If anything is damaged or missing, please report it using\n"
-            "the /start menu. Thank you! 🙏"
+            "1. [Take the bottle of disinfectant spray along with a piece of disposable cloth]\n"
+            "2. [Spray and wipe the table, you can use the cloth multiple times before disposing it]\n"
+            "3. [Bring back the disinfectant spray to the cabinet.]\n\n"
         ),
     },
 }
