@@ -41,9 +41,9 @@ LOCATIONS = [
 
 REPORT_TYPES = {
     "missing": {
-        "label": "🛒 Missing / Used Up Stock",
+        "label": "🛒 Used Up Stock",
         "emoji": "🛒",
-        "title": "Missing / Used Up Stock",
+        "title": "Used Up Stock",
         "desc_prompt": (
             "What item is missing or has run out? Please describe it clearly.\n\n"
             "_Example: Toilet paper rolls, hand soap, mop head_"
@@ -81,7 +81,7 @@ REPORT_TYPES = {
 # ─────────────────────────────────────────────
 CLEANING_INSTRUCTIONS = {
     "main_menu": (
-        "🧹 <b>Cleaning Instructions</b>\n\n"
+        "🧹 <b>Cleaning Guide</b>\n\n"
         "Select a topic below to learn how to use the cleaning equipment properly."
     ),
     "mop": {
@@ -126,10 +126,10 @@ CLEANING_INSTRUCTIONS = {
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     keyboard = [
-        [InlineKeyboardButton(REPORT_TYPES["missing"]["label"], callback_data="type_missing")],
-        [InlineKeyboardButton(REPORT_TYPES["broken"]["label"], callback_data="type_broken")],
-        [InlineKeyboardButton(REPORT_TYPES["issue"]["label"], callback_data="type_issue")],
-        [InlineKeyboardButton("🧹 Cleaning Instructions", callback_data="cleaning_menu")],
+        [InlineKeyboardButton("🧹 Cleaning Guide", callback_data="cleaning_menu")],
+        [InlineKeyboardButton("🛒 Used Up Stock", callback_data="type_missing")],
+        [InlineKeyboardButton("🔧 Broken Equipment", callback_data="type_broken")],
+        [InlineKeyboardButton("⚠️ Unresolved Issue", callback_data="type_issue")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
@@ -315,10 +315,10 @@ async def back_to_main(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     keyboard = [
-        [InlineKeyboardButton(REPORT_TYPES["missing"]["label"], callback_data="type_missing")],
-        [InlineKeyboardButton(REPORT_TYPES["broken"]["label"], callback_data="type_broken")],
-        [InlineKeyboardButton(REPORT_TYPES["issue"]["label"], callback_data="type_issue")],
-        [InlineKeyboardButton("🧹 Cleaning Instructions", callback_data="cleaning_menu")],
+        [InlineKeyboardButton("🧹 Cleaning Guide", callback_data="cleaning_menu")],
+        [InlineKeyboardButton("🛒 Used Up Stock", callback_data="type_missing")],
+        [InlineKeyboardButton("🔧 Broken Equipment", callback_data="type_broken")],
+        [InlineKeyboardButton("⚠️ Unresolved Issue", callback_data="type_issue")],
     ]
     await query.edit_message_text(
         "What would you like to do?",
