@@ -57,7 +57,7 @@ REPORT_TYPES = {
         "title": "Broken Equipment",
         "desc_prompt": (
             "What equipment is broken or damaged? Please describe the issue.\n\n"
-            "_Example: Mop bucket wheel is cracked, cloth handle is bent_"
+            "_Example: Mop bucket wheel is cracked, mop is bent_"
         ),
         "color": "🔴",
         "needs_location": False,
@@ -68,7 +68,7 @@ REPORT_TYPES = {
         "title": "Unresolved Issue",
         "desc_prompt": (
             "What issue did you notice? What did you try?\n\n"
-            "_Example: Light flickering in Hub, couldn't find the right switch_"
+            "_Example: IDR Male toilet second cubicle is choked, couldn't flush it down"
         ),
         "color": "🟠",
         "needs_location": True,
@@ -85,9 +85,9 @@ CLEANING_INSTRUCTIONS = {
         "Select a topic below to learn how to use the cleaning equipment properly."
     ),
     "mop": {
-        "label": "🪣 Using a Mop after a spill",
+        "label": "If the spill requires mopping",
         "text": (
-            "🪣 <b>Taking the mop from the cabinet</b>\n\n"
+            "🪣 <b>Take the blue mop from the cabinet</b>\n\n"
             "1. Take the yellow pail and put in 1 pump of Heavenly Lime\n"
             "2. Take one blue mop and bring the yellow pail to fill it up with water in the toilet\n"
             "3. There is a bidet gun you can use under the cabinet in the male toilet, else you can use the shower\n"
