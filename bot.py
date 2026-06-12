@@ -4,7 +4,7 @@ import html
 from datetime import datetime
 from telegram import (
     Update, InlineKeyboardButton, InlineKeyboardMarkup,
-    ReplyKeyboardRemove
+    ReplyKeyboardRemove, InputMediaPhoto
 )
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, CallbackQueryHandler,
@@ -21,7 +21,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-FM_GROUP_CHAT_ID = os.getenv("FM_GROUP_CHAT_ID")  # negative number for groups
+FM_GROUP_CHAT_ID = os.getenv("FM_GROUP_CHAT_ID")
+ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID", "0"))  # Your Telegram user ID
 
 # Conversation states
 REPORT_TYPE, LOCATION, DESCRIPTION, PHOTO = range(4)
@@ -46,7 +47,7 @@ REPORT_TYPES = {
         "title": "Used Up Stock",
         "desc_prompt": (
             "What item is missing or has run out? Please describe it clearly.\n\n"
-            "_Example: Toilet paper rolls, hand soap, mop head_"
+            "Example: Toilet paper rolls, hand soap, mop head"
         ),
         "color": "🟡",
         "needs_location": False,
@@ -57,7 +58,7 @@ REPORT_TYPES = {
         "title": "Broken Equipment",
         "desc_prompt": (
             "What equipment is broken or damaged? Please describe the issue.\n\n"
-            "_Example: Mop bucket wheel is cracked, mop is bent_"
+            "Example: Mop bucket wheel is cracked, cloth handle is bent"
         ),
         "color": "🔴",
         "needs_location": False,
@@ -68,7 +69,7 @@ REPORT_TYPES = {
         "title": "Unresolved Issue",
         "desc_prompt": (
             "What issue did you notice? What did you try?\n\n"
-            "_Example: IDR Male toilet second cubicle is choked, couldn't flush it down"
+            "Example: Light flickering in Hub, couldn't find the right switch"
         ),
         "color": "🟠",
         "needs_location": True,
@@ -76,8 +77,15 @@ REPORT_TYPES = {
 }
 
 # ─────────────────────────────────────────────
-# CLEANING INSTRUCTIONS
-# Edit the sections below with your actual content
+# CLEANING GUIDE
+#
+# To add photos to a topic:
+# 1. Send /addphoto to the bot (you must be the admin)
+# 2. Send the photo — the bot replies with a file_id
+# 3. Paste the file_id string into the "photos" list below
+#
+# Each topic can have multiple photos — just add more file_id strings.
+# Leave the list empty [] if no photos yet.
 # ─────────────────────────────────────────────
 CLEANING_INSTRUCTIONS = {
     "main_menu": (
@@ -85,15 +93,20 @@ CLEANING_INSTRUCTIONS = {
         "Select a topic below to learn how to use the cleaning equipment properly."
     ),
     "mop": {
-        "label": "If the spill requires mopping",
+        "label": "🪣 Using a Mop after a spill",
         "text": (
-            "🪣 <b>Take the blue mop from the cabinet</b>\n\n"
+            "🪣 <b>Taking the mop from the cabinet</b>\n\n"
             "1. Take the yellow pail and put in 1 pump of Heavenly Lime\n"
             "2. Take one blue mop and bring the yellow pail to fill it up with water in the toilet\n"
             "3. There is a bidet gun you can use under the cabinet in the male toilet, else you can use the shower\n"
             "4. Mop in a figure-8 motion, working backwards\n"
             "5. Wring out fully before mopping dry areas\n"
         ),
+        "photos": [
+            # Paste your file_id strings here, e.g.:
+            # "AgACAgUAAxkBAAI...",
+            # "AgACAgUAAxkBAAI...",
+        ],
     },
     "cloths": {
         "label": "🧽 Cleaning Table after hangout",
@@ -103,6 +116,9 @@ CLEANING_INSTRUCTIONS = {
             "2. You can use the cloth multiple times and then dispose the cloth\n"
             "3. Return the disinfectant spray to the cabinet after use\n"
         ),
+        "photos": [
+            # Paste your file_id strings here
+        ],
     },
     "returning": {
         "label": "📦 Returning Equipment",
@@ -115,12 +131,51 @@ CLEANING_INSTRUCTIONS = {
             "If anything is damaged or missing, please report it using\n"
             "the /start menu. Thank you! 🙏"
         ),
+        "photos": [
+            # Paste your file_id strings here
+        ],
     },
 }
 
 
 # ─────────────────────────────────────────────
-# HANDLERS
+# ADMIN: /addphoto helper
+# ─────────────────────────────────────────────
+
+async def addphoto_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    if ADMIN_USER_ID and user.id != ADMIN_USER_ID:
+        await update.message.reply_text("⛔ You are not authorised to use this command.")
+        return
+
+    await update.message.reply_text(
+        "📸 Send me a photo and I'll reply with its <b>file_id</b>.\n\n"
+        "Copy the file_id and paste it into the <code>photos</code> list "
+        "for the relevant topic in <code>bot.py</code>.",
+        parse_mode="HTML"
+    )
+    context.user_data["awaiting_guide_photo"] = True
+
+
+async def addphoto_receive(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.user_data.get("awaiting_guide_photo"):
+        return
+
+    user = update.effective_user
+    if ADMIN_USER_ID and user.id != ADMIN_USER_ID:
+        return
+
+    file_id = update.message.photo[-1].file_id
+    await update.message.reply_text(
+        f"✅ <b>Photo file_id:</b>\n\n<code>{file_id}</code>\n\n"
+        "Copy this and paste it into the <code>photos</code> list for the relevant topic in <code>bot.py</code>.",
+        parse_mode="HTML"
+    )
+    context.user_data["awaiting_guide_photo"] = False
+
+
+# ─────────────────────────────────────────────
+# MAIN MENU & REPORT FLOW
 # ─────────────────────────────────────────────
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -149,7 +204,6 @@ async def report_type_selected(update: Update, context: ContextTypes.DEFAULT_TYP
     context.user_data["report_type"] = report_type
     rtype = REPORT_TYPES[report_type]
 
-    # Issues need a location; missing/broken go straight to description
     if rtype["needs_location"]:
         location_buttons = []
         for i in range(0, len(LOCATIONS), 2):
@@ -205,6 +259,11 @@ async def description_received(update: Update, context: ContextTypes.DEFAULT_TYP
 
 
 async def photo_received(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Ignore if this is an admin uploading a guide photo
+    if context.user_data.get("awaiting_guide_photo"):
+        await addphoto_receive(update, context)
+        return PHOTO
+
     photo = update.message.photo[-1]
     context.user_data["photo_file_id"] = photo.file_id
     await send_report(update, context)
@@ -268,7 +327,7 @@ async def send_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ─────────────────────────────────────────────
-# CLEANING INSTRUCTIONS HANDLERS
+# CLEANING GUIDE HANDLERS
 # ─────────────────────────────────────────────
 
 async def cleaning_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -299,15 +358,37 @@ async def cleaning_topic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
     topic_key = topic_map.get(query.data)
     topic = CLEANING_INSTRUCTIONS[topic_key]
+    photos = topic.get("photos", [])
 
     back_button = InlineKeyboardMarkup([
-        [InlineKeyboardButton("« Back to Cleaning Menu", callback_data="cleaning_menu")]
+        [InlineKeyboardButton("« Back to Cleaning Guide", callback_data="cleaning_menu")]
     ])
+
+    # Send the text instructions (edit the existing message)
     await query.edit_message_text(
         topic["text"],
         reply_markup=back_button,
         parse_mode="HTML"
     )
+
+    # Send photos as a follow-up if any are set
+    if photos:
+        chat_id = query.message.chat_id
+        if len(photos) == 1:
+            await context.bot.send_photo(
+                chat_id=chat_id,
+                photo=photos[0],
+                caption="📸 Reference photo"
+            )
+        else:
+            media_group = [
+                InputMediaPhoto(media=file_id, caption=f"📸 Photo {i+1}" if i == 0 else "")
+                for i, file_id in enumerate(photos)
+            ]
+            await context.bot.send_media_group(
+                chat_id=chat_id,
+                media=media_group
+            )
 
 
 async def back_to_main(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -342,6 +423,9 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
+
+    # Admin photo helper — outside conversation flow
+    app.add_handler(CommandHandler("addphoto", addphoto_start))
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start), CommandHandler("report", start)],
@@ -378,6 +462,12 @@ def main():
     )
 
     app.add_handler(conv_handler)
+
+    # Handle guide photo uploads outside of conversation flow too
+    app.add_handler(MessageHandler(
+        filters.PHOTO & filters.User(ADMIN_USER_ID) if ADMIN_USER_ID else filters.PHOTO,
+        addphoto_receive
+    ))
 
     logger.info("Bot is running...")
     app.run_polling(drop_pending_updates=True)
