@@ -103,9 +103,8 @@ CLEANING_INSTRUCTIONS = {
             "5. Wring out fully before mopping dry areas\n"
         ),
         "photos": [
-            # Paste your file_id strings here, e.g.:
-            # "AgACAgUAAxkBAAI...",
-            # "AgACAgUAAxkBAAI...",
+            # "AgACAgUAAxkBAAN3aiutXNhcgFKX1Ipf_rTgzGdBbaMAAugQaxuJzGBV_rtQEroBoOMBAAMCAAN5AAM8BA",
+            # "AgACAgUAAxkBAAN7aiutZV_RU59YOUvmtHWF7e_UDi8AAukQaxuJzGBVDaq-Hm3Gi1sBAAMCAAN5AAM8BA",
         ],
     },
     "cloths": {
@@ -117,7 +116,8 @@ CLEANING_INSTRUCTIONS = {
             "3. Return the disinfectant spray to the cabinet after use\n"
         ),
         "photos": [
-            # Paste your file_id strings here
+            # "AgACAgUAAxkBAAODaiutdm0dhAfxFg7zBG-Rd8Tm6VQAAuwQaxuJzGBVzTSlhh4PXPQBAAMCAAN5AAM8BA",
+            # "AgACAgUAAxkBAAOHaiutgz7SEU3d1EQqH0aro1ImZk8AAu0QaxuJzGBViZ_eixxQ8IsBAAMCAAN5AAM8BA",
         ],
     },
     "returning": {
@@ -132,7 +132,7 @@ CLEANING_INSTRUCTIONS = {
             "the /start menu. Thank you! 🙏"
         ),
         "photos": [
-            # Paste your file_id strings here
+            # "AgACAgUAAxkBAAN_aiutbt9YX10VrTRp4xgKrmi_fqQAAusQaxuJzGBVxJ3A57PYAkwBAAMCAAN5AAM8BA"
         ],
     },
 }
